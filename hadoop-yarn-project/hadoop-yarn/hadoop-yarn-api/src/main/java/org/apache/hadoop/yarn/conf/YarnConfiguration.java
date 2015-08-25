@@ -88,7 +88,13 @@ public class YarnConfiguration extends Configuration {
   /** Delay before deleting resource to ease debugging of NM issues */
   public static final String DEBUG_NM_DELETE_DELAY_SEC =
     YarnConfiguration.NM_PREFIX + "delete.debug-delay-sec";
-  
+
+  /**
+   * Node Manager Energy Efficiency factor for a given job
+   */
+  public static final String NODEMANAGER_ENERGY_EFFICIENCY_FACTOR =
+      YarnConfiguration.NM_PREFIX + "energy.efficiency.factor";
+
   ////////////////////////////////
   // IPC Configs
   ////////////////////////////////

@@ -120,6 +120,12 @@ public class EfhScheduler extends
 
   private final ResourceCalculator resourceCalculator = new DefaultResourceCalculator();
 
+  /**
+   * Variables needed by the heuristic function computation
+   */
+  private Co
+
+
   private final Queue DEFAULT_QUEUE = new Queue() {
     @Override
     public String getQueueName() {
@@ -841,7 +847,7 @@ public class EfhScheduler extends
     }
   }
 
-  @Lock(FifoScheduler.class)
+  @Lock(EfhScheduler.class)
   @Override
   protected synchronized void completedContainer(RMContainer rmContainer,
                                                  ContainerStatus containerStatus, RMContainerEventType event) {
