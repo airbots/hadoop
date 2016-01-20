@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.commons.logging.Log;
@@ -123,8 +124,10 @@ public class EfhScheduler extends
   /**
    * Variables needed by the heuristic function computation
    */
-  private Co
+  //map: node -> energy efficiency
+  private ConcurrentHashMap<NodeId, Float> energyEff;
 
+  private ConcurrentHashMap<, d>
 
   private final Queue DEFAULT_QUEUE = new Queue() {
     @Override
