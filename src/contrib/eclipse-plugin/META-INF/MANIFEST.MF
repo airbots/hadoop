@@ -25,4 +25,10 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-ClassPath: classes/,
  lib/hadoop-core.jar
+ lib/commons-cli-1.2.jar,
+ lib/commons-configuration-1.6.jar,
+ lib/commons-httpclient-3.0.1.jar,
+ lib/commons-lang-2.4.jar,
+ lib/jackson-core-asl1.8.8.jar,
+ lib/jackson-mapper-asl1.8.8.jar
 Bundle-Vendor: Apache Hadoop
