@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.mapred;
+package contrib.fairscheduler.src.java.org.apache.hadoop.mapred;
 
 /**
  * Thrown when the allocation file for {@link PoolManager} is malformed.  

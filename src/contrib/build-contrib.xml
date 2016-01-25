@@ -22,7 +22,7 @@
 <project name="hadoopbuildcontrib" xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <property name="version" value="1.2.2-SNAPSHOT" />
-  <property name="eclipse.home" value="/Users/chehe/eclipse"/>
+  <property name="eclipse.home" value="/usr/share/eclipse"/>
   <property name="name" value="${ant.project.name}"/>
   <property name="root" value="${basedir}"/>
   <property name="hadoop.root" location="${root}/../../../"/>
