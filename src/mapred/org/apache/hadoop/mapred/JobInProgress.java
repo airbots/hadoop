@@ -127,7 +127,16 @@ public class JobInProgress {
   private volatile boolean launchedSetup = false;
   private volatile boolean jobKilled = false;
   private volatile boolean jobFailed = false;
-
+  
+  //Chen's Code
+  int preNodeNumLocal = 0;
+  int preNodeNumRemote = 0;
+  HashMap<String, Integer> nodeMapSlots = new HashMap<String, Integer>();
+  HashMap<String, HashSet<String>> nodeToBlkMap = new HashMap<String, HashSet<String>>();
+  HashMap<String, HashSet<String>> blkToNodeMap = new HashMap<String, HashSet<String>>();
+	
+  
+  
   JobPriority priority = JobPriority.NORMAL;
   final JobTracker jobtracker;
   
@@ -362,6 +371,7 @@ public class JobInProgress {
     } catch (IOException ie){
       throw new RuntimeException(ie);
     }
+    
   }
   
   JobInProgress(JobTracker jobtracker, final JobConf default_conf, 
@@ -486,6 +496,13 @@ public class JobInProgress {
       //authenticated user (if security is ON).
       FileSystem.closeAllForUGI(UserGroupInformation.getCurrentUser());
     }
+    
+    //Chen's code initialize WYJ algorithm variables
+	for(TaskTrackerStatus trackerStatus: this.jobtracker.activeTaskTrackers()){
+	  String trackerName = trackerStatus.getTrackerName();
+	  nodeMapSlots.put(trackerName, trackerStatus.getMaxMapSlots());
+	  
+	}
   }
 
   /**
@@ -1422,18 +1439,52 @@ public class JobInProgress {
     return obtainNewMapTaskCommon(tts, clusterSize, numUniqueHosts, 1);
   }
   
+  //update PreNodeNumber of Remote and Local Map Tasks
+  public synchronized int updatePreNodeTaskNum(TaskTrackerStatus tts, int localityLevel) {
+	int totalMapTasks;
+
+  }
+  
   public synchronized Task obtainNewNodeOrRackLocalMapTask(
       TaskTrackerStatus tts, int clusterSize, int numUniqueHosts)
   throws IOException {
-    return obtainNewMapTaskCommon(tts, clusterSize, numUniqueHosts, maxLevel);
+	
+	Task t = obtainNewMapTaskCommon(tts, clusterSize, numUniqueHosts, maxLevel);
+	//prepare the computation of P according to mft and sft
+	preNodeNumLocal = updatePreNodeNum(tts, maxLevel);
+	
+	if (t == null) {
+		//no local task found
+		return t;
+	} else {
+	
+	  if(t!= null &preNodeNumLocal ) {
+		
+	  } else {
+		
+	  }
+	}
   }
   
   public synchronized Task obtainNewNonLocalMapTask(TaskTrackerStatus tts,
                                                     int clusterSize, 
                                                     int numUniqueHosts)
       throws IOException {
-    return obtainNewMapTaskCommon(tts, clusterSize, numUniqueHosts, 
-        NON_LOCAL_CACHE_LEVEL);
+	Task t = obtainNewMapTaskCommon(tts, clusterSize, numUniqueHosts, 
+	        NON_LOCAL_CACHE_LEVEL);
+	
+	//prepare the computation of P according to mft and sft
+	preNodeNumRemote = updatePreNodeTaskNum(tts, NON_LOCAL_CACHE_LEVEL);
+	   
+	if (t == null) {
+		return t;
+	} else {
+	  if(preNodeNumRemote) {
+		
+	  } else {
+		
+	  }
+	}
   }
   
   public void schedulingOpportunity() {
