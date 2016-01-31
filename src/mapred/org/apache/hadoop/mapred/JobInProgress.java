@@ -44,6 +44,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobTracker;
 import org.apache.hadoop.mapred.CleanupQueue.PathDeletionContext;
 import org.apache.hadoop.mapred.Counters.CountersExceededException;
 import org.apache.hadoop.mapred.JobHistory.Values;
@@ -134,7 +135,9 @@ public class JobInProgress {
   HashMap<String, Integer> nodeMapSlots = new HashMap<String, Integer>();
   HashMap<String, HashSet<String>> nodeToBlkMap = new HashMap<String, HashSet<String>>();
   HashMap<String, HashSet<String>> blkToNodeMap = new HashMap<String, HashSet<String>>();
-	
+  HashMap<String, Float> localTaskExeTime = new HashMap<String, Float>();
+  HashMap<String, Float> remoteTaskExeTime = new HashMap<String, Float>();
+  int blockSize;
   
   
   JobPriority priority = JobPriority.NORMAL;
@@ -501,8 +504,23 @@ public class JobInProgress {
 	for(TaskTrackerStatus trackerStatus: this.jobtracker.activeTaskTrackers()){
 	  String trackerName = trackerStatus.getTrackerName();
 	  nodeMapSlots.put(trackerName, trackerStatus.getMaxMapSlots());
-	  
+	  localTaskExeTime.put(trackerName, (float)0.0);
+	  remoteTaskExeTime.put(trackerName, (float)0.0);
+	  nodeToBlkMap.put(trackerName, value);
 	}
+	
+	
+	
+	for(TaskInProgress tip: maps){
+      String blkName = tip.;
+      HashSet<String> nodesForBlock = new HashSet<String>();
+	  for(String str: tip.getSplitLocations()){
+		  nodesForBlock.add(jobtracker.getNode(str).getName());
+	  }
+      blkToNodeMap.put(blkName, nodesForBlock);
+	}
+	
+	
   }
 
   /**
@@ -1441,8 +1459,10 @@ public class JobInProgress {
   
   //update PreNodeNumber of Remote and Local Map Tasks
   public synchronized int updatePreNodeTaskNum(TaskTrackerStatus tts, int localityLevel) {
-	int totalMapTasks;
+	int totalMapTasks = numMapTasks;
 
+	
+	
   }
   
   public synchronized Task obtainNewNodeOrRackLocalMapTask(
