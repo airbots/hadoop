@@ -154,11 +154,16 @@ class JobQueueTaskScheduler extends TaskScheduler {
       Math.min((int)Math.ceil(mapLoadFactor * trackerMapCapacity), 
                               trackerMapCapacity);
     int availableMapSlots = trackerCurrentMapCapacity - trackerRunningMaps;
+    //for our scheduler we do not need to 
+    availableMapSlots = trackerMapCapacity - trackerRunningMaps;
+    
     boolean exceededMapPadding = false;
     if (availableMapSlots > 0) {
       exceededMapPadding = 
         exceededPadding(true, clusterStatus, trackerMapCapacity);
     }
+    //we do not allow padding
+    exceededMapPadding = false;
     
     int numLocalMaps = 0;
     int numNonLocalMaps = 0;
@@ -177,6 +182,9 @@ class JobQueueTaskScheduler extends TaskScheduler {
           t = 
             job.obtainNewNodeOrRackLocalMapTask(taskTrackerStatus, 
                 numTaskTrackers, taskTrackerManager.getNumberOfUniqueHosts());
+          
+          //
+          
           if (t != null) {
             assignedTasks.add(t);
             ++numLocalMaps;
@@ -201,16 +209,21 @@ class JobQueueTaskScheduler extends TaskScheduler {
             assignedTasks.add(t);
             ++numNonLocalMaps;
             
+            //
+            break;
+            
             // We assign at most 1 off-switch or speculative task
             // This is to prevent TaskTrackers from stealing local-tasks
             // from other TaskTrackers.
-            break scheduleMaps;
+            //break scheduleMaps;
           }
         }
       }
     }
     int assignedMaps = assignedTasks.size();
 
+//end of scheduling map tasks    
+    
     //
     // Same thing, but for reduce tasks
     // However we _never_ assign more than 1 reduce task per heartbeat
