@@ -1460,8 +1460,255 @@ public class JobInProgress {
   //update PreNodeNumber of Remote and Local Map Tasks
   public synchronized int updatePreNodeTaskNum(TaskTrackerStatus tts, int localityLevel) {
 	int totalMapTasks = numMapTasks;
+	int chunksize=64;                                            // ?
+	  float Vchunksize=1;
+	  float [] B= new float [totalMapTasks];
+	  float [][] AvailTime=new float [totalMapTasks];
 
-	
+	  int [] AssumedNodeNumLocalMap=new int [totalMapTasks];
+	  int [] AssumedNodeNumRemoteMap=new int [totalMapTasks];
+	  int [] PreNodeNumLocalMap=new int [totalMapTasks];
+	  int [] PreNodeNumRemoteMap=new int [totalMapTasks];
+	  int [][] AssumedNumLocalMap=new int [totalMapTasks][];
+	  int [][] AssumedNumRemoteMap=new int [totalMapTasks][];
+	  int [][] PreNumLocalMap=new int [totalMapTasksM][];
+	  int [][] PreNumRemoteMap=new int [totalMapTasks][];
+	  float [][] MFT=new float [totalMapTasks][];
+	  float [] minMFT=new float [totalMapTasks];
+	  float [] SFT=new float [totalMapTasks];
+	  float [] D=new float [totalMapTasks];
+	  float [] DperB=new float [totalMapTasks];
+	  float minSFT;
+	  int [] index_minMFT=new int [totalMapTasks];
+
+
+	  for (int i=0;i<totalMapTasks;i++){
+	    B[i]=16;
+	    AssumedNodeNumLocalMap[i]=0;
+	    AssumedNodeNumRemoteMap[i]=0;
+	    PreNodeNumLocalMap[i]=0;
+	    PreNodeNumRemoteMap[i]=0;
+	    AssumedNumLocalMap[i]=new int [k[i]];
+	    AssumedNumRemoteMap[i]=new int [k[i]];
+	    PreNumLocalMap[i]=new int [k[i]];
+	    PreNumRemoteMap[i]=new int [k[i]];
+	    AvailTime[i]=new float [k[i]];
+	    for (int j=0;j<k[i];j++){
+	      AssumedNumLocalMap[i][j]=0;
+	      AssumedNumRemoteMap[i][j]=0;
+	      PreNumLocalMap[i][j]=0;
+	      PreNumRemoteMap[i][j]=0;
+	      AvailTime[i][j]=0;
+	    }
+	  }
+	  int[] MaxnumMaps={17,17,15,15};
+	  while T>0{
+		    for (int i = 0;i<M; i++){
+		      MFT[i] = new double[k[i]];
+		      index_minMFT[i] = 0;
+		      minMFT[i] = Integer.MAX_VALUE;
+		      //**********invoke Algorithm2 to calculation MFT*********
+		      for (int j = 0; j < k[i]; j++) {
+		        MFT[i][j] =PreNumLocalMap[i][j]*TLocalMap[i][j]+PreNumRemoteMap[i][j]+TRemoteMap[i][j]+AvailTime[i][j];
+		        if (minMFT[i] > MFT[i][j]) {
+		          minMFT[i] = MFT[i][j];
+		          index_minMFT[i] = j;
+		        }
+		      }
+		     //*************algorithm 2 complete******************//
+		      int m = index_minMFT[i];
+		      //  t = job.obtainNewNodeOrRackLocalMapTask(taskTrackerStatus,
+		      //                  numTaskTrackers, taskTrackerManager.getNumberOfUniqueHosts());
+		      //if (t !=null ){
+		      if (MaxnumMaps[i]>0){
+		        AssumedNumLocalMap[i][m] = PreNumLocalMap[i][m] + 1;
+		        AssumedNumRemoteMap[i][m] = PreNumRemoteMap[i][m];
+		        AssumedNodeNumLocalMap[i][m] = PreNodeNumLocalMap[i][m] + 1;
+		        AssumedNodeNumRemoteMap[i][m] = PreNodeNumRemoteMap[i][m];
+		      }
+		      else{
+		        AssumedNumLocalMap[i][m] = PreNumLocalMap[i][m] ;
+		        AssumedNumRemoteMap[i][m] = PreNumRemoteMap[i][m]+1;
+		        AssumedNodeNumLocalMap[i][m] = PreNodeNumLocalMap[i][m] ;
+		        AssumedNodeNumRemoteMap[i][m] = PreNodeNumRemoteMap[i][m]+1;
+		      }
+		    }
+		    //*******invoke Algorithm 3 to calculate SFT***************//
+		    double[][] newMFT = new double[M][];
+		    double[] UpdatedMFT = new double[M];
+		    for (int i = 0; i < M; i++) {
+		      newMFT[i] = new double[k[i]];
+		      for (int j = 0; j < k[i]; j++) {
+		        if (j == index_minMFT[i]) {
+		          newMFT[i][j] = AssumedNumLocalMap[i][j] * TLocalMap[i][j] + AssumedNumRemoteMap[i][j] * TRemoteMap[i][j] + AvailTime[i][j];
+		        } else {
+		          newMFT[i][j] = PreNumLocalMap[i][j] * TLocalMap[i][j] + PreNumRemoteMap[i][j] * TRemoteMap[i][j] + AvailTime[i][j];
+		        }
+		        UpdatedMFT[i] = newMFT[i][0];
+		        if (UpdatedMFT[i] < newMFT[i][j]) {
+		          UpdatedMFT[i] = newMFT[i][j];
+		        }
+		      }
+		    }
+		    int indexSFT = 0;
+		    minSFT = Integer.MAX_VALUE;
+		    for (int i = 0; i < M; i++) {
+		      D[i] = AssumedNodeNumRemoteMap[i] * chunksize + Vchunksize * (AssumedNodeNumLocalMap[i] + AssumedNodeNumRemoteMap[i]) * chunksize;
+		      DperB[i] = D[i] / B[i];
+		      if (UpdatedMFT[i] > DperB[i]) {
+		        SFT[i] = UpdatedMFT[i];
+		      } else {
+		        SFT[i] = DperB[i];
+		      }
+		      if (minSFT > SFT[i]) {
+		        minSFT = SFT[i];
+		        indexSFT = i;
+		      }
+		    }
+		    //*********Algorithm3 complete*************//
+
+		    int p = indexSFT;
+		    int mm = index_minMFT[p];
+		    //t = job.obtainNewNodeOrRackLocalMapTask(taskTrackerStatus,
+		     //       numTaskTrackers, taskTrackerManager.getNumberOfUniqueHosts());
+		   // if (t!=null){
+		    if (MaxnumMaps[i]>0){
+		      PreNodeNumLocalMap[p] = PreNodeNumLocalMap[p] + 1;
+		      PreNumLocalMap[p][mm] = PreNumLocalMap[p][mm] + 1;
+		      MAxnumMaps[p]--;                                                     ///?????
+		      T--;
+		    //updata Z///////////////////////////////
+		      int updateI=0;
+		      for (int ss=0; ss<2;ss++){  //
+		        if (Taskonnode[Z[p][0]][ss]==p)
+		          continue;
+		        else {
+		          updateI=Taskonnode[Z[p][0]][ss];
+		        }
+		        System.out.println("updateI is "+updateI);
+		      }
+		      //Z[updateI]需要更新；
+		      int jjj=0;
+		      int midArr[] = new int[Z[updateI].length];
+		      System.out.print("old Z[updateI] is");
+		      System.out.println(Arrays.toString(Z[updateI]) + " ");
+		      for(int jupdate=0; jupdate<Z[updateI].length; jupdate++){
+		        if(Z[updateI][jupdate]==Z[p][0]){
+		          continue;                        //
+		        }
+		        midArr[jjj] = Z[updateI][jupdate];  //
+		        jjj++;                              //
+		      }
+		      int newArr[] = new int[jjj] ;
+		      System.arraycopy(midArr, 0, newArr, 0, newArr.length);
+		      Z[updateI]=newArr;
+		      System.out.print("new Z[updateI] is");
+		      System.out.println(Arrays.toString(Z[updateI]));
+		      MaxnumMaps[updateI]=MaxnumMaps[updateI]-1;
+		      // continue;
+
+		      //update Z[p](分配给task的node需要update its Z；)
+		      int midBrr[] = new int[Z[p].length];
+		      int jB=0;
+		      System.out.print("old Z[p] is");
+		      System.out.println(Arrays.toString(Z[p])+ " ");
+		      for(int x=0; x<Z[p].length; x++){
+		        if(Z[p][x]==Z[p][0]){
+		          continue;
+		        }
+		        midBrr[jB] = Z[p][x];
+		        jB++;
+		      }
+		      int newBrr[] = new int[jB];
+		      //System.arraycopy(midBrr, 0, newBrr, 0, newBrr.length);
+		      Z[p]=newBrr;
+		    }
+		    else{
+		      PreNodeNumRemoteMap[p] = PreNodeNumRemoteMap[p] + 1;
+		      PreNumRemoteMap[p][mm] = PreNumRemoteMap[p][mm] + 1;
+		      T--;
+		    //updata Z??///////////////////////////////
+		      //need to determine steal which node 's task & TaskTag
+		      int[] Irandomnode={0,0,0,0};
+		      int vv=0;
+		      //ArrayList Irandomnode=new ArrayList();
+		      for (int ww=0;ww<4;ww++){
+		        if (MaxnumMaps[ww]==0)
+		          continue;
+		        if (MaxnumMaps[ww]!=0){
+		          Irandomnode[vv]=ww;
+		          vv++;
+		        }
+
+		      }
+		      System.out.println("Irandomnode= "+Arrays.toString(Irandomnode));
+		      int randseed=0;
+		      for (int ff=0; ff<4;ff++){
+		        if (Irandomnode[ff]>0)
+		          randseed++;
+		        if (Irandomnode[ff]==0)
+		          break;
+		      }
+		      System.out.println("randseed= "+randseed);
+		      int bb=(int)(Math.random() * randseed) ;
+		      System.out.println("bb= "+bb);
+		      int stealNodeI=Irandomnode[bb];
+		      System.out.println("stealNodeI = "+stealNodeI);
+
+		      for (int ee=0; (ee<2);ee++){  //ss<2表示每个task分别在2个 node可以  run
+		        int stealNodeII;
+		        int tag=Z[stealNodeI][0];
+		        System.out.println("tag = "+tag);
+		        if (Taskonnode[tag][ee]==stealNodeI)
+		          continue;
+		        else {
+		          stealNodeII=Taskonnode[tag][ee];
+		          System.out.println("stealNodeII = "+stealNodeII);
+
+		          //need to update two node(stealNoedI&stealNoedII)'S block :Z
+		          int midCrr[] = new int[Z[stealNodeII].length];
+		          int jC=0;
+		          System.out.print("old Z[stealNodeII] is");
+		          System.out.println(Arrays.toString(Z[stealNodeII])+ " ");
+		          for(int x=0; x<Z[stealNodeII].length; x++){
+		            if(Z[stealNodeII][x]==Z[stealNodeI][0]){
+
+		              continue;
+		            }
+		            midCrr[jC] = Z[stealNodeII][x];
+		            jC++;
+		          }
+		          int newCrr[] = new int[jC] ;
+		          System.arraycopy(midCrr, 0, newCrr, 0, newCrr.length);
+		          Z[stealNodeII]=newCrr;
+		          System.out.print("new Z[stealNodeII] is");
+		          System.out.println(Arrays.toString(Z[stealNodeII]));
+		          MaxnumMaps[stealNodeII]=MaxnumMaps[stealNodeII]-1;
+		        }
+		      }
+
+		      int midDrr[] = new int[Z[stealNodeI].length];
+		      int jD=0;
+		      System.out.print("old Z[stealNodeI] is");
+		      System.out.println(Arrays.toString(Z[stealNodeI])+ " ");
+		      for(int y=0; y<Z[stealNodeI].length; y++){
+		        if(Z[stealNodeI][y]==Z[stealNodeI][0]){
+		          continue;
+		        }
+		        midDrr[jD] = Z[stealNodeI][y];
+		        jD++;
+		      }
+		      int newDrr[] = new int[jD] ;
+		      System.arraycopy(midDrr, 0, newDrr, 0, newDrr.length);
+		      Z[stealNodeI]=newDrr;
+		      System.out.print("new Z[stealNodeI] is");
+		      System.out.println(Arrays.toString(Z[stealNodeI]));
+		      MaxnumMaps[stealNodeI]=MaxnumMaps[stealNodeI]-1;
+
+		    }
+		  } //end while
+
+		  return (PreNodeNumRemoteMap,PreNodeNumLocalMap);
 	
   }
   
