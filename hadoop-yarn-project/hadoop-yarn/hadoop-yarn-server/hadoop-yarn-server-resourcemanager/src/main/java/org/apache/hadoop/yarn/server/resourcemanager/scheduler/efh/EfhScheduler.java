@@ -19,6 +19,7 @@
 package org.apache.hadoop.yarn.server.resourcemanager.scheduler.efh;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +79,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicat
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicationAttempt;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicationAttempt.ContainersAndNMTokensAllocation;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerUtils;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacitySchedulerConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerApp;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerNode;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAddedSchedulerEvent;
@@ -110,7 +112,7 @@ public class EfhScheduler extends
   private static final RecordFactory recordFactory =
       RecordFactoryProvider.getRecordFactory(null);
 
-  Configuration conf;
+  private Configuration yarnConf;
 
   private boolean usePortForNodeName;
 
@@ -126,6 +128,7 @@ public class EfhScheduler extends
    */
   //map: node -> energy efficiency
   private ConcurrentHashMap<NodeId, Float> energyEff;
+  private EfhSchedulerConfiguration conf;
 
   private ConcurrentHashMap<, d>
 
@@ -219,7 +222,9 @@ public class EfhScheduler extends
     super(EfhScheduler.class.getName());
   }
 
-  private synchronized void initScheduler(Configuration conf) {
+  private synchronized void initScheduler(Configuration conf) throws IOException {
+
+    this.conf = loadEfhSchedulerConfiguration(conf);
     validateConf(conf);
     //Use ConcurrentSkipListMap because applications need to be ordered
     this.applications =
@@ -261,7 +266,24 @@ public class EfhScheduler extends
 
   @Override
   public synchronized void setConf(Configuration conf) {
-    this.conf = conf;
+    this.yarnConf = conf;
+  }
+
+  private EfhSchedulerConfiguration loadEfhSchedulerConfiguration(
+      Configuration configuration) throws IOException {
+    try {
+      InputStream CSInputStream =
+          this.rmContext.getConfigurationProvider()
+              .getConfigurationInputStream(configuration,
+                  YarnConfiguration.CS_CONFIGURATION_FILE);
+      if (CSInputStream != null) {
+        configuration.addResource(CSInputStream);
+        return new EfhSchedulerConfiguration(configuration, false);
+      }
+      return new EfhSchedulerConfiguration(configuration, true);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
   }
 
   private void validateConf(Configuration conf) {
@@ -993,5 +1015,14 @@ public class EfhScheduler extends
 
   private void readDataLocalityInfo() {
 
+    //TODO find all files in the given dir and read them into a collection
+
+
+  }
+
+  private boolean createLocalityInfoDir() {
+
+
+    return false;
   }
 }

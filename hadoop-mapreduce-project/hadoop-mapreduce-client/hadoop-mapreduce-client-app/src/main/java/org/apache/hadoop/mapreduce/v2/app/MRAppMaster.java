@@ -1640,4 +1640,15 @@ public class MRAppMaster extends CompositeService {
   public ClientService getClientService() {
     return clientService;
   }
+
+  public void setLocalityInfo() throws IOException {
+    //TODO get the directory that used for data locality info for scheduler
+    FileSystem fs = this.getFileSystem(this.getConfig());
+
+    //TODO write the task info in a file with the name of application Id
+
+
+    //TODO each line has a task id and a list of node hostname
+
+  }
 }
