@@ -20,6 +20,7 @@ package org.apache.hadoop.yarn.api.protocolrecords.impl.pb;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,6 +55,7 @@ public class AllocateRequestPBImpl extends AllocateRequest {
   private List<ContainerId> release = null;
   private List<ContainerResourceIncreaseRequest> increaseRequests = null;
   private ResourceBlacklistRequest blacklistRequest = null;
+  private HashMap<Integer,List<String>> taskTopology = null;
   
   public AllocateRequestPBImpl() {
     builder = AllocateRequestProto.newBuilder();
@@ -159,6 +161,14 @@ public class AllocateRequestPBImpl extends AllocateRequest {
     initAsks();
     this.ask.clear();
     this.ask.addAll(resourceRequests);
+  }
+
+  public void setTaskTopology(final HashMap<Integer, List<String>> taskTopology) {
+    if (taskTopology == null) {
+      return;
+    }
+    maybeInitBuilder();
+    builder.setTaskTopology(taskTopology);
   }
   
   @Override

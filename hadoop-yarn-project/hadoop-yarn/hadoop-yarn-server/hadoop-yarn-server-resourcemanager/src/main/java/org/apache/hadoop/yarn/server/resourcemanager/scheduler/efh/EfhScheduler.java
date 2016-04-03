@@ -129,6 +129,10 @@ public class EfhScheduler extends
 
   private ConcurrentHashMap<, d>
 
+  //Map used for schedule to know which node has how many unassigned local task for each app
+  //should update after each time assignment
+  private ConcurrentHashMap<NodeId, HashMap<ApplicationId, Integer>> localityNodeToApps;
+
   private final Queue DEFAULT_QUEUE = new Queue() {
     @Override
     public String getQueueName() {
@@ -980,5 +984,14 @@ public class EfhScheduler extends
 
   public Resource getUsedResource() {
     return usedResource;
+  }
+
+  /**
+   * Method for scheduler to read all job's task locality information when making
+   * scheduling decisions
+   */
+
+  private void readDataLocalityInfo() {
+
   }
 }
