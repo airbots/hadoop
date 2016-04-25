@@ -38,6 +38,11 @@ message RegisterApplicationMasterRequestProto {
   optional string host = 1;
   optional int32 rpc_port = 2;
   optional string tracking_url = 3;
+  repeated TaskBlockLocationProto = 4;
+}
+
+message TaskBlockLocationProto {
+  repeated string hostname = 1;
 }
 
 message RegisterApplicationMasterResponseProto {
