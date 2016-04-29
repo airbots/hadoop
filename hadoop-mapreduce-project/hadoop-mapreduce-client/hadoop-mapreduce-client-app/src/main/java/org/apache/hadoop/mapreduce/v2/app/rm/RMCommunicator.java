@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -176,6 +178,49 @@ public abstract class RMCommunicator extends AbstractService
       LOG.error("Exception while registering", are);
       throw new YarnRuntimeException(are);
     }
+  }
+
+  protected void register(HashMap<String, HashSet<String>> taskInfo) {
+    //Register
+    InetSocketAddress serviceAddr = null;
+    if (clientService != null ) {
+      serviceAddr = clientService.getBindAddress();
+    }
+    try {
+      RegisterApplicationMasterRequest request =
+          recordFactory.newRecordInstance(RegisterApplicationMasterRequest.class);
+      if (serviceAddr != null) {
+        request.setHost(serviceAddr.getHostName());
+        request.setRpcPort(serviceAddr.getPort());
+        request.setTrackingUrl(MRWebAppUtil
+            .getAMWebappScheme(getConfig())
+            + serviceAddr.getHostName() + ":" + clientService.getHttpPort());
+        request.setTaskLocationInfo(taskInfo);
+      }
+      RegisterApplicationMasterResponse response =
+          scheduler.registerApplicationMaster(request);
+      isApplicationMasterRegistered = true;
+      maxContainerCapability = response.getMaximumResourceCapability();
+      this.context.getClusterInfo().setMaxContainerCapability(
+          maxContainerCapability);
+      if (UserGroupInformation.isSecurityEnabled()) {
+        setClientToAMToken(response.getClientToAMTokenMasterKey());
+      }
+      this.applicationACLs = response.getApplicationACLs();
+      LOG.info("maxContainerCapability: " + maxContainerCapability);
+      String queue = response.getQueue();
+      LOG.info("queue: " + queue);
+      job.setQueueName(queue);
+      this.schedulerResourceTypes.addAll(response.getSchedulerResourceTypes());
+    } catch (Exception are) {
+      LOG.error("Exception while registering", are);
+      throw new YarnRuntimeException(are);
+    }
+
+  }
+
+  private void createRequest() {
+
   }
 
   private void setClientToAMToken(ByteBuffer clientToAMTokenMasterKey) {

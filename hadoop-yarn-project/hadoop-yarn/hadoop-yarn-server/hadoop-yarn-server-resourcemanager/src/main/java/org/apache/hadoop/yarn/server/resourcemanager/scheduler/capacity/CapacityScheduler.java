@@ -1579,7 +1579,12 @@ public class CapacityScheduler extends
     return EnumSet
       .of(SchedulerResourceTypes.MEMORY, SchedulerResourceTypes.CPU);
   }
-  
+
+  @Override
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId) {
+
+  }
+
   private String handleMoveToPlanQueue(String targetQueueName) {
     CSQueue dest = getQueue(targetQueueName);
     if (dest != null && dest instanceof PlanQueue) {

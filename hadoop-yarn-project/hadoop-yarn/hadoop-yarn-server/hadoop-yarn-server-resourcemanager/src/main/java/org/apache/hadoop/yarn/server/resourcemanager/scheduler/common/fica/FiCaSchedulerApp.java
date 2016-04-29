@@ -19,6 +19,7 @@
 package org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,8 @@ public class FiCaSchedulerApp extends SchedulerApplicationAttempt {
     new HashSet<ContainerId>();
     
   private CapacityHeadroomProvider headroomProvider;
+
+  private HashMap<String, HashSet<String>> taskLocationInfo = null;
 
   public FiCaSchedulerApp(ApplicationAttemptId applicationAttemptId, 
       String user, Queue queue, ActiveUsersManager activeUsersManager,
@@ -210,6 +213,10 @@ public class FiCaSchedulerApp extends SchedulerApplicationAttempt {
     return false;
   }
 
+  public synchronized HashMap<String, HashSet<String>> getTaskLocationInfo(){
+    return this.taskLocationInfo;
+  }
+
   public synchronized float getLocalityWaitFactor(
       Priority priority, int clusterNodes) {
     // Estimate: Required unique resources (i.e. hosts + racks)
@@ -323,6 +330,7 @@ public class FiCaSchedulerApp extends SchedulerApplicationAttempt {
     this.headroomProvider = 
       ((FiCaSchedulerApp) appAttempt).getHeadroomProvider();
   }
+
 
 
 }

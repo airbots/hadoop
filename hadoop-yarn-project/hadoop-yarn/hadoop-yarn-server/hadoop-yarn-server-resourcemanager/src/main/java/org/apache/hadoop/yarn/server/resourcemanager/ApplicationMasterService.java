@@ -329,6 +329,13 @@ public class ApplicationMasterService extends AbstractService implements
       response.setSchedulerResourceTypes(rScheduler
         .getSchedulingResourceTypes());
 
+      /* CHEN's code
+      call scheduler method to get the taskLocationInfo and save to scheduler
+       */
+      //TODO need to comeup with a HashMap from the RPC from AM to construct
+      //the TaskLocationInfo
+      rScheduler.setAMJobInfo(applicationAttemptId, null);
+
       return response;
     }
   }

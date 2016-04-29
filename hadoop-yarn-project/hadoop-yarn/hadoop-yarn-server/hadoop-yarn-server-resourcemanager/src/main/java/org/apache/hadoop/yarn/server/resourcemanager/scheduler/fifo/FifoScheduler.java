@@ -944,6 +944,11 @@ public class FifoScheduler extends
   }
 
   @Override
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId) {
+
+  }
+
+  @Override
   public QueueMetrics getRootQueueMetrics() {
     return DEFAULT_QUEUE.getMetrics();
   }

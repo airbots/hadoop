@@ -1625,6 +1625,11 @@ public class FairScheduler extends
   }
 
   @Override
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId) {
+
+  }
+
+  @Override
   public Set<String> getPlanQueues() throws YarnException {
     Set<String> planQueues = new HashSet<String>();
     for (FSQueue fsQueue : queueMgr.getQueues()) {

@@ -20,6 +20,7 @@ package org.apache.hadoop.yarn.server.resourcemanager.scheduler;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -45,6 +46,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.QueueEntitlement;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.SchedulerEvent;
 import org.apache.hadoop.yarn.proto.YarnServiceProtos.SchedulerResourceTypes;
+import org.apache.hadoop.yarn.proto.YarnServiceProtos.TaskBlockLocationProto;
 import org.apache.hadoop.yarn.util.resource.ResourceCalculator;
 
 /**
@@ -277,4 +279,11 @@ public interface YarnScheduler extends EventHandler<SchedulerEvent> {
    * @return an EnumSet containing the resource types
    */
   public EnumSet<SchedulerResourceTypes> getSchedulingResourceTypes();
+
+
+  /**
+   * update Corresponding job scheduling information of a given application
+   * @param appAttemptId
+   */
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId, HashMap taskLocationInfo);
 }

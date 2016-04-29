@@ -130,7 +130,7 @@ public class EfhScheduler extends
   private ConcurrentHashMap<NodeId, Float> energyEff;
   private EfhSchedulerConfiguration conf;
 
-  private ConcurrentHashMap<, d>
+  //private HashMap<ApplicationAttemptId, d>
 
   //Map used for schedule to know which node has how many unassigned local task for each app
   //should update after each time assignment
@@ -976,6 +976,13 @@ public class EfhScheduler extends
   public RMContainer getRMContainer(ContainerId containerId) {
     FiCaSchedulerApp attempt = getCurrentAttemptForContainer(containerId);
     return (attempt == null) ? null : attempt.getRMContainer(containerId);
+  }
+
+  @Override
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId, HashMap taskLocationInfo) {
+    FiCaSchedulerApp app = getApplicationAttempt(appAttemptId);
+    HashMap tli = app.getTaskLocationInfo();
+
   }
 
   @Override

@@ -27,6 +27,9 @@ import org.apache.hadoop.yarn.proto.YarnServiceProtos.RegisterApplicationMasterR
 
 import com.google.protobuf.TextFormat;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 @Private
 @Unstable
 public class RegisterApplicationMasterRequestPBImpl extends RegisterApplicationMasterRequest {
@@ -130,5 +133,11 @@ public class RegisterApplicationMasterRequestPBImpl extends RegisterApplicationM
       return;
     }
     builder.setTrackingUrl(url);
+  }
+
+  @Override
+  public void setTaskLocationInfo(HashMap<String, HashSet<String>> taskInfo){
+    RegisterApplicationMasterRequestProtoOrBuilder p = viaProto ? proto : builder;
+    return p.setTaskLocationInfo(taskInfo);
   }
 }  

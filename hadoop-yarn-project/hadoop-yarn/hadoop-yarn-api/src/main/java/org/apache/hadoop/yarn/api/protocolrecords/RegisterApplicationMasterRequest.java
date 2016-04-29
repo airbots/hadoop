@@ -23,6 +23,9 @@ import org.apache.hadoop.classification.InterfaceStability.Stable;
 import org.apache.hadoop.yarn.api.ApplicationMasterProtocol;
 import org.apache.hadoop.yarn.util.Records;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
  * <p>The request sent by the <code>ApplicationMaster</code> to 
  * <code>ResourceManager</code> on registration.</p>
@@ -133,4 +136,14 @@ public abstract class RegisterApplicationMasterRequest {
   @Public
   @Stable
   public abstract void setTrackingUrl(String trackingUrl);
+
+  /**
+   * <code>ApplicationMaster</code> reports its tasks location information to
+   * <code>EfhScheduler</>scheduler
+   *
+   * @return <em>TaskLocationMap</em> for the job
+   */
+   @Public
+   @Stable
+  public abstract void setTaskLocationInfo(HashMap<String,HashSet<String>> taskInfo);
 }

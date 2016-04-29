@@ -163,6 +163,7 @@ public class AllocateRequestPBImpl extends AllocateRequest {
     this.ask.addAll(resourceRequests);
   }
 
+  /**
   public void setTaskTopology(final HashMap<Integer, List<String>> taskTopology) {
     if (taskTopology == null) {
       return;
@@ -170,6 +171,7 @@ public class AllocateRequestPBImpl extends AllocateRequest {
     maybeInitBuilder();
     builder.setTaskTopology(taskTopology);
   }
+   */
   
   @Override
   public List<ContainerResourceIncreaseRequest> getIncreaseRequests() {
