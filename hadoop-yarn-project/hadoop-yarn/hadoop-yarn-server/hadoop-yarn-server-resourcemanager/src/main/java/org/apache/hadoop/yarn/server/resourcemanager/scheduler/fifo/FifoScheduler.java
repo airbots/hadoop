@@ -944,6 +944,11 @@ public class FifoScheduler extends
   }
 
   @Override
+  public void setAMJobInfo(ApplicationAttemptId appAttemptId, HashMap taskLocationInfo) {
+
+  }
+
+  @Override
   public void setAMJobInfo(ApplicationAttemptId appAttemptId) {
 
   }

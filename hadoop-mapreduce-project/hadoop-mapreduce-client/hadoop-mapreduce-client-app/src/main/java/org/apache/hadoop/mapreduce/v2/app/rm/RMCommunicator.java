@@ -180,7 +180,7 @@ public abstract class RMCommunicator extends AbstractService
     }
   }
 
-  protected void register(HashMap<String, HashSet<String>> taskInfo) {
+  public void register(HashMap<String, HashSet<String>> taskInfo) {
     //Register
     InetSocketAddress serviceAddr = null;
     if (clientService != null ) {

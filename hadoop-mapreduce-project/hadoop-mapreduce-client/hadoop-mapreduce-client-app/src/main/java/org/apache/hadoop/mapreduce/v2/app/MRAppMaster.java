@@ -207,6 +207,9 @@ public class MRAppMaster extends CompositeService {
   private SpeculatorEventDispatcher speculatorEventDispatcher;
   private AMPreemptionPolicy preemptionPolicy;
 
+  //efhscheduler parameter
+  private HashMap taskInfo;
+
   private Job job;
   private Credentials jobCredentials = new Credentials(); // Filled during init
   protected UserGroupInformation currentUser; // Will be setup during init
@@ -837,6 +840,8 @@ public class MRAppMaster extends CompositeService {
             this.clientService, this.context, preemptionPolicy);
       }
       ((Service)this.containerAllocator).init(getConfig());
+      initTaskInfo();
+      ((RMCommunicator)this.containerAllocator).register(taskInfo);
       ((Service)this.containerAllocator).start();
       super.serviceStart();
     }
@@ -1649,6 +1654,11 @@ public class MRAppMaster extends CompositeService {
 
 
     //TODO each line has a task id and a list of node hostname
+
+  }
+
+  //efhscheduler
+  void initTaskInfo() {
 
   }
 }
